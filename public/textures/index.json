@@ -1,0 +1,22 @@
+{
+  "materials": {
+    "WO-101": {
+      "name": "White Oak",
+      "preview": "/textures/white-oak.jpg",
+      "normal": "/textures/white-oak-normal.jpg",
+      "roughness": "/textures/white-oak-roughness.jpg"
+    },
+    "WA-201": {
+      "name": "American Walnut",
+      "preview": "/textures/walnut.jpg",
+      "normal": "/textures/walnut-normal.jpg",
+      "roughness": "/textures/walnut-roughness.jpg"
+    },
+    "MP-301": {
+      "name": "Matte Pearl",
+      "preview": "/textures/matte-pearl.jpg",
+      "normal": "/textures/matte-pearl-normal.jpg",
+      "roughness": "/textures/matte-pearl-roughness.jpg"
+    }
+  }
+}
