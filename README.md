@@ -17,3 +17,9 @@ A custom furniture and wardrobe configurator built with React, TypeScript, and S
 | OpenAI      | GPT-powered assistive features    |
 
 ---
+
+## 🚀 Getting Started
+
+### 1. Install Dependencies
+```bash
+npm install
