@@ -1,14 +1,35 @@
-import React from 'react';
-import FillerPanelsList from './components/FillerPanelsList';
-import AddFillerPanel from './components/AddFillerPanel';
+import { useState } from 'react';
+import SmplrspaceViewer from './SmplrspaceViewer';
+import PanelFormModal from './PanelFormModal';
 
-function App() {
+const App = () => {
+  const [layoutData, setLayoutData] = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleSavePanel = (panelData) => {
+    // Logic to update layout data
+    setLayoutData((prev) => ({
+      ...prev,
+      panels: [...(prev.panels || []), panelData],
+    }));
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 space-y-6">
-      <AddFillerPanel />
-      <FillerPanelsList />
+    <div className="flex">
+      <div className="w-1/3 p-4">
+        <Button onClick={() => setModalOpen(true)}>Add Panel</Button>
+        <PanelFormModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSavePanel}
+        />
+        {/* Panel List Here */}
+      </div>
+      <div className="w-2/3 p-4">
+        <SmplrspaceViewer layoutData={layoutData} />
+      </div>
     </div>
   );
-}
+};
 
 export default App;
