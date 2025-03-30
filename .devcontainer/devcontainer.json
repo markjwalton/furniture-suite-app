@@ -1,0 +1,6 @@
+{
+    "containerEnv": {
+      "VITE_FIGMA_API_KEY": "${localEnv:FIGMA_API_KEY}"
+    }
+  }
+  
