@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from '../../APi/supabaseClient';
 
 export const getProjects = async () => {
   const { data, error } = await supabase.from('projects').select('*');

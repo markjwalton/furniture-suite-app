@@ -1,32 +1,56 @@
-import { useState } from 'react';
-import SmplrspaceViewer from './SmplrspaceViewer';
-import PanelFormModal from './PanelFormModal';
+import { useState, useEffect } from 'react';
+import { supabase } from './api/supabaseClient';
+import SmplrspaceViewer from './components/viewers/SmplrspaceViewer';
+import PanelForm from './components/forms/PanelForm';
 
 const App = () => {
-  const [layoutData, setLayoutData] = useState({});
-  const [modalOpen, setModalOpen] = useState(false);
+  const [panels, setPanels] = useState([]);
 
-  const handleSavePanel = (panelData) => {
-    // Logic to update layout data
-    setLayoutData((prev) => ({
-      ...prev,
-      panels: [...(prev.panels || []), panelData],
-    }));
+  const fetchPanels = async () => {
+    const { data, error } = await supabase
+      .from('furniture_items')
+      .select('panels')
+      .eq('name', 'Test Furniture')
+      .single();
+
+    if (error) {
+      console.error('Error fetching panels:', error);
+      return;
+    }
+
+    setPanels(data.panels || []);
   };
 
+  useEffect(() => {
+    fetchPanels();
+  }, []);
+
   return (
-    <div className="flex">
-      <div className="w-1/3 p-4">
-        <Button onClick={() => setModalOpen(true)}>Add Panel</Button>
-        <PanelFormModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onSave={handleSavePanel}
-        />
-        {/* Panel List Here */}
+    <div className="flex w-screen h-screen">
+      <div className="w-1/3 bg-gray-50 border-r border-gray-200 p-4 overflow-auto">
+        <h1 className="text-xl font-bold mb-4">Wardrobe Configurator</h1>
+        <PanelForm />
+        <button onClick={fetchPanels} className="mt-4 bg-blue-500 text-white px-3 py-1 rounded">
+          Refresh Panels
+        </button>
+        <div className="mt-6">
+          <h2 className="text-lg font-bold mb-2">Panels List</h2>
+          <ul>
+            {panels.map((panel) => (
+              <li key={panel.id}>
+                {panel.label} - {panel.dimensions.width}x{panel.dimensions.height}x{panel.dimensions.thickness}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-      <div className="w-2/3 p-4">
-        <SmplrspaceViewer layoutData={layoutData} />
+
+      <div className="w-2/3 h-full">
+        <SmplrspaceViewer
+          panels={panels}
+          spaceId={import.meta.env.VITE_SMPLRSPACE_ID}
+          clientToken={import.meta.env.VITE_SMPLRSPACE_CLIENT_TOKEN}
+        />
       </div>
     </div>
   );
