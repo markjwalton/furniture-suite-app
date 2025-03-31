@@ -1,85 +1,173 @@
-import React from 'react';
-import { ConfigurationState } from '@/types/wardrobe';
+// FILE: /src/components/WardrobeSVG.tsx
+
+import React from "react";
+
+export type GrooveConfig = {
+  inset: number;
+  width: number;
+  depth: number;
+};
+
+export type ScribePoint = {
+  height: number;
+  width: number;
+};
+
+export type Panel = {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: string;
+  grainDirection?: "vertical" | "horizontal";
+  label?: string;
+  color?: string;
+  depth?: number;
+  positionFromFloor?: number;
+  insetFromLeft?: number;
+  insetFromRight?: number;
+  grooves?: {
+    left?: GrooveConfig;
+    right?: GrooveConfig;
+    top?: GrooveConfig;
+    bottom?: GrooveConfig;
+  };
+  edges?: {
+    front?: boolean;
+    back?: boolean;
+    left?: boolean;
+    right?: boolean;
+  };
+  boardType?: string;
+  boardStyle?: string;
+  boardThickness?: number;
+  edgeBanding?: {
+    type?: string;
+    style?: string;
+    color?: string;
+    thickness?: number;
+    edges?: {
+      front?: boolean;
+      back?: boolean;
+      left?: boolean;
+      right?: boolean;
+    };
+  };
+  scribePoints?: ScribePoint[];
+  snapToDefault?: boolean;
+  backInsetLeft?: number;
+  backInsetRight?: number;
+};
 
 interface WardrobeSVGProps {
-  config: ConfigurationState;
-  width?: number;
-  height?: number;
-  depth?: number;
-  numberOfSections?: number;
-  panelThickness?: number;
-  fillers?: {
-    top: { height: number };
-    bottom: { height: number };
-  };
-  flooringCode?: string;
+  panels: Panel[];
+  selectedPanelId?: string;
+  onSelectPanel?: (panelId: string) => void;
 }
 
 const WardrobeSVG: React.FC<WardrobeSVGProps> = ({
-  config,
-  width = 800,
-  height = 600,
-  depth = 600,
-  numberOfSections = 3,
-  panelThickness = 19,
-  fillers = { top: { height: 0 }, bottom: { height: 0 } },
-  flooringCode
+  panels,
+  selectedPanelId,
+  onSelectPanel,
 }) => {
-  const dimensions = config.dimensions || { width: 2400, height: 2200, depth: 600 };
-  const sectionWidth = dimensions.width / numberOfSections;
+  const grooveInset = 20;
+  const grooveWidth = 9;
 
-  const scale = Math.min(width / dimensions.width, height / dimensions.height) * 0.9;
-  const translateX = (width - dimensions.width * scale) / 2;
-  const translateY = (height - dimensions.height * scale) / 2;
+  // Sort to render backs first for layering
+  const sortedPanels = [...panels].sort((a, b) => {
+    if (a.type === 'back') return -1;
+    if (b.type === 'back') return 1;
+    return 0;
+  });
 
   return (
-    <svg width={width} height={height} className="bg-gray-50 rounded-lg">
-      <g transform={`translate(${translateX},${translateY}) scale(${scale})`}>
-        <rect
-          x={0}
-          y={0}
-          width={dimensions.width}
-          height={dimensions.height}
-          fill="#f8f8f8"
-          stroke="#ccc"
-        />
+    <svg width="100%" height="100%" viewBox="0 0 3000 2500" className="border">
+      {sortedPanels.map((panel) => {
+        const isSelected = selectedPanelId === panel.id;
+        const isTall = panel.height > panel.width;
 
-        {/* Sections */}
-        {Array.from({ length: numberOfSections - 1 }).map((_, i) => (
-          <line
-            key={i}
-            x1={(i + 1) * sectionWidth}
-            y1={0}
-            x2={(i + 1) * sectionWidth}
-            y2={dimensions.height}
-            stroke="#ddd"
-          />
-        ))}
+        const grooveX =
+          panel.type === "left"
+            ? panel.x + panel.width - grooveInset - grooveWidth
+            : panel.type === "intermediate"
+            ? panel.x + grooveInset
+            : null;
 
-        {/* Drawers */}
-        {config.drawers.map((drawer, idx) => (
-          <rect
-            key={idx}
-            x={drawer.external ? 0 : panelThickness}
-            y={dimensions.height - (idx + 1) * 200}
-            width={drawer.external ? dimensions.width : sectionWidth - panelThickness * 2}
-            height={200}
-            fill="#eaeaea"
-            stroke="#ccc"
-          />
-        ))}
+        const renderScribedEdge = panel.scribePoints && panel.scribePoints.length >= 2;
 
-        {/* Optional flooring */}
-        {flooringCode && (
-          <rect
-            x={-50}
-            y={dimensions.height}
-            width={dimensions.width + 100}
-            height={100}
-            fill="#ddd"
-          />
-        )}
-      </g>
+        return (
+          <g
+            key={panel.id}
+            onClick={() => onSelectPanel?.(panel.id)}
+            className="cursor-pointer"
+          >
+            {/* Scribed filler shape */}
+            {renderScribedEdge ? (
+              <polygon
+                fill={panel.color || "#e5e7eb"}
+                stroke={isSelected ? "#3b82f6" : "#1f2937"}
+                strokeWidth={isSelected ? 2 : 1}
+                points={panel.scribePoints
+                  .map((pt) => `${panel.x + pt.width},${panel.y + pt.height}`)
+                  .join(" ") + ` ${panel.x},${panel.y + panel.height}`}
+              />
+            ) : (
+              <rect
+                x={panel.x}
+                y={panel.y}
+                width={panel.width}
+                height={panel.height}
+                fill={panel.color || "#e5e7eb"}
+                stroke={isSelected ? "#3b82f6" : "#1f2937"}
+                strokeWidth={isSelected ? 2 : 1}
+              />
+            )}
+
+            {/* Groove marker */}
+            {grooveX !== null && isTall && (
+              <rect
+                x={grooveX}
+                y={panel.y}
+                width={grooveWidth}
+                height={panel.height}
+                fill="#9ca3af"
+              />
+            )}
+
+            {/* Grain direction */}
+            {panel.grainDirection && (
+              <text
+                x={panel.x + panel.width / 2}
+                y={panel.y + panel.height / 2}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="28"
+                fill="#374151"
+                transform={
+                  panel.grainDirection === "horizontal"
+                    ? `rotate(-90, ${panel.x + panel.width / 2}, ${panel.y + panel.height / 2})`
+                    : undefined
+                }
+              >
+                ↓
+              </text>
+            )}
+
+            {/* Label */}
+            {panel.label && (
+              <text
+                x={panel.x + 12}
+                y={panel.y + 32}
+                fontSize="24"
+                fill="#111827"
+              >
+                {panel.label}
+              </text>
+            )}
+          </g>
+        );
+      })}
     </svg>
   );
 };

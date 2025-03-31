@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Optional if you're using `border-border` somewhere */
+/* Full height layout support */
 html, body, #__next {
   height: 100%;
   margin: 0;

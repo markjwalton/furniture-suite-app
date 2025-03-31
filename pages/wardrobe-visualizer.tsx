@@ -91,21 +91,20 @@ const SmplrspaceViewer = ({ spaceId, clientToken, panels }: SmplrspaceViewerProp
         const width = panel.dimensions.width / 1000;
         const height = panel.dimensions.height / 1000;
         const depth = panel.dimensions.thickness / 1000;
-        const posX = panel.position.x / 1000;
-        const posY = 0.1; // elevate slightly above ground
-        const posZ = panel.position.z / 1000;
 
         console.log('🟩 Adding panel:', {
           id: panel.id,
-          dimensions: { width, height, depth },
-          position: { x: posX, y: posY, z: posZ },
+          width,
+          height,
+          depth,
+          position: { x: 1, y: 0, z: 1 },
         });
 
         builderRef.current.addObject({
           id: panel.id,
           type: 'custom',
           name: panel.label,
-          position: { x: posX, y: posY, z: posZ },
+          position: { x: 1, y: 0, z: 1 },
           rotation: panel.rotation,
           scale: { x: 1, y: 1, z: 1 },
           components: {
@@ -118,7 +117,7 @@ const SmplrspaceViewer = ({ spaceId, clientToken, panels }: SmplrspaceViewerProp
               },
             },
             material: {
-              color: '#00FF00', // bright green
+              color: '#00FF00',
             },
           },
           customProperties: {
@@ -138,3 +137,4 @@ const SmplrspaceViewer = ({ spaceId, clientToken, panels }: SmplrspaceViewerProp
 
 export default SmplrspaceViewer;
 
+  
